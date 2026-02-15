@@ -155,36 +155,82 @@ if page == "🏠 የሰራተኞች መሙያ":
 
 # --- ገጽ 2: የማናጀር ገጽ ---
 elif page == "🔐 የማናጀር ገጽ":
-    st.markdown("<h1>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1>", unsafe_allow_html=True)
+    # ለጽሑፍ ግልጽነት የሚረዳ CSS
+    st.markdown("""
+        <style>
+        .request-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #007bff;
+            margin-bottom: 10px;
+            color: #212529 !important;
+        }
+        .request-card b { color: #1e3d59; }
+        </style>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<h1 style='color: #1e3d59;'>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1>", unsafe_allow_html=True)
+    st.markdown("---")
+    
     admin_password = st.text_input("የአስተዳዳሪ ፓስወርድ ያስገቡ", type="password")
     
-    if admin_password == st.secrets.get("admin_password", "1234"):
-        df = conn.read(worksheet="Sheet1", ttl=0)
-        if not df.empty:
-            pending = df[df['Status'] == 'Pending']
-            st.subheader(f"📬 የሚጠባበቁ ጥያቄዎች ({len(pending)})")
+    # 1. ተጠቃሚው ፓስወርድ ማስገባቱን ማረጋገጥ
+    if admin_password:
+        correct_pwd = st.secrets.get("admin_password", "1234")
+        
+        # 2. ፓስወርዱ ትክክል ከሆነ የሚሰራው ክፍል
+        if admin_password == correct_pwd:
+            df = conn.read(ttl=0)
             
-            for index, row in pending.iterrows():
-                with st.expander(f"👤 {row['Full Name']} - {row['Reason']}"):
-                    st.write(f"**መለያ:** {row['ID']} | **ቀን:** {row['Date']}")
-                    st.write(f"**ዝርዝር:** {row['Details']}")
-                    rem = st.text_input("ማሳሰቢያ (Remark)", key=f"rem_{index}")
-                    c1, c2 = st.columns(2)
-                    if c1.button("✅ አጽድቅ", key=f"app_{index}"):
-                        df.at[index, 'Status'] = 'Approved'
-                        df.at[index, 'Remark'] = rem
-                        conn.update(worksheet="Sheet1", data=df)
-                        st.rerun()
-                    if c2.button("❌ ሰርዝ", key=f"rej_{index}"):
-                        df.at[index, 'Status'] = 'Cancelled'
-                        df.at[index, 'Remark'] = rem
-                        conn.update(worksheet="Sheet1", data=df)
-                        st.rerun()
-        else:
-            st.info("ምንም ዳታ የለም።")
-    elif admin_password:
-        st.error("❌ የተሳሳተ ፓስወርድ!")
+            if not df.empty and 'Status' in df.columns:
+                pending = df[df['Status'] == 'Pending']
+                
+                st.subheader(f"📬 የተጠየቁ  ጥያቄዎች ({len(pending)})")
+                if not pending.empty:
+                    for index, row in pending.iterrows():
+                        st.markdown(f"""
+                            <div class="request-card">
+                                <b>👤 ሰራተኛ:</b> {row['Full Name']}<br>
+                                <b>📅 ቀን:</b> {row['Date']}<br>
+                                <b>❓ ምክንያት:</b> {row['Reason']}<br>
+                                <b>📝 ዝርዝር:</b> {row['Details']}
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        rem = st.text_input("ማሳሰቢያ (Remark)", key=f"r_{index}")
+                        c1, c2 = st.columns(2)
+                        
+                        if c1.button("✅ አጽድቅ", key=f"a_{index}"):
+                            df.at[index, 'Status'] = 'Approved'
+                            df.at[index, 'Remark'] = rem
+                            conn.update(data=df)
+                            st.success("ጸድቋል!")
+                            st.rerun()
 
+                        if c2.button("❌ ሰርዝ", key=f"c_{index}"):
+                            df.at[index, 'Status'] = 'Cancelled'
+                            df.at[index, 'Remark'] = rem
+                            conn.update(data=df)
+                            st.warning("ተሰርዟል!")
+                            st.rerun()
+                else:
+                    st.info("አዲስ የሚጠበቅ ጥያቄ የለም።")
+                
+                st.markdown("---")
+                st.subheader("📥 ሪፖርት ማውጫ")
+                csv = df.to_csv(index=False).encode('utf-8-sig')
+                st.download_button("📊 ሙሉ ሪፖርት አውርድ (Excel/CSV)", data=csv, file_name=f"Attendance_Report_{date.today()}.csv", mime="text/csv")
+            else:
+                st.warning("ምንም ዳታ አልተገኘም።")
+        
+        # 3. ፓስወርዱ ስህተት ከሆነ የሚታይ መልእክት
+        else:
+            st.error("❌ You inserted incorrect password. Please try again.")
+            
+    else:
+        # ፓስወርድ ገና ሳይገባ የሚታይ መመሪያ
+        st.info("እባክዎ መቆጣጠሪያውን ለመክፈት ፓስወርድ ያስገቡ።")
 # --- ገጽ 3: ዳሽቦርድ ---
 elif page == "📊 ዳሽቦርድ":
     st.markdown("<h1>📊 የክትትል ዳሽቦርድ</h1>", unsafe_allow_html=True)
@@ -197,4 +243,5 @@ elif page == "📊 ዳሽቦርድ":
         st.plotly_chart(px.pie(df, names='Reason', title='የፈቃድ/የመቅረት ምክንያቶች'), use_container_width=True)
     else:
         st.info("ዳታ አልተገኘም።")
+
 
