@@ -155,7 +155,9 @@ if page == "🏠 የሰራተኞች መሙያ":
                 st.error("❌ የሰራተኛ መለያ ቁጥር አልተገኘም!")
 
 # --- ገጽ 2: የማናጀር ገጽ ---
+# --- ገጽ 2: የማናጀር ገጽ ---
 elif page == "🔐 የማናጀር ገጽ":
+    # የአርዕስት ሳጥን ከደማቅ ሰማያዊ መስመር ጋር
     st.markdown("<div class='header-box'><h1>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1></div>", unsafe_allow_html=True)
     
     admin_password = st.text_input("የአስተዳዳሪ ፓስወርድ ያስገቡ", type="password")
@@ -164,34 +166,51 @@ elif page == "🔐 የማናጀር ገጽ":
         df = conn.read(worksheet="Sheet1", ttl=0)
         if not df.empty:
             pending = df[df['Status'] == 'Pending']
-            st.subheader(f"📬 አዲስ ጥያቄዎች ({len(pending)})")
+            st.markdown(f"### 📬 የሚጠባበቁ ጥያቄዎች ({len(pending)})")
             
             for index, row in pending.iterrows():
+                # አንተ የፈለግከው ዘመናዊ የካርድ ዲዛይን
                 st.markdown(f"""
-                    <div class="request-card">
-                        <span style='color: #007bff; font-weight: bold;'>👤 ሰራተኛ: {row['Full Name']}</span><br>
-                        <b>🆔 መለያ:</b> {row['ID']} | <b>❓ ምክንያት:</b> {row['Reason']}<br>
-                        <b>📅 ቀን:</b> {row['Date']} ({row['Start_Time']} - {row['End_Time']})<br>
-                        <b>📝 ዝርዝር:</b> {row['Details']}
+                    <div style="
+                        background-color: #ffffff;
+                        padding: 20px;
+                        border-radius: 12px;
+                        border: 1px solid #e1e8f0;
+                        border-left: 8px solid #00d4ff;
+                        margin-bottom: 15px;
+                        box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
+                        font-family: 'Segoe UI', sans-serif;
+                    ">
+                        <div style='color: #1e3d59; font-size: 1.2rem; font-weight: 800; margin-bottom: 8px;'>
+                            👤 ሰራተኛ: {row['Full Name']}
+                        </div>
+                        <div style='color: #4a5568; font-size: 1rem; line-height: 1.6;'>
+                            <b>🆔 መለያ:</b> {row['ID']} | <b>❓ ምክንያት:</b> <span style='color: #e53e3e;'>{row['Reason']}</span><br>
+                            <b>📅 ቀን:</b> {row['Date']} ({row['Start_Time']} - {row['End_Time']})<br>
+                            <b>📝 ዝርዝር:</b> {row['Details'] if str(row['Details']) != 'nan' else 'ዝርዝር አልተገለጸም'}
+                        </div>
                     </div>
                 """, unsafe_allow_html=True)
                 
-                rem = st.text_input("ማሳሰቢያ (Remark)", key=f"r_{index}", placeholder="ለምሳሌ: ተፈቅዷል...")
-                c1, c2 = st.columns(2)
-                if c1.button("✅ አጽድቅ", key=f"a_{index}"):
-                    df.at[index, 'Status'] = 'Approved'
-                    df.at[index, 'Remark'] = rem
-                    conn.update(worksheet="Sheet1", data=df)
-                    st.success(f"የ {row['Full Name']} ጥያቄ ጸድቋል!")
-                    st.rerun()
-                if c2.button("❌ ሰርዝ", key=f"c_{index}"):
-                    df.at[index, 'Status'] = 'Cancelled'
-                    df.at[index, 'Remark'] = rem
-                    conn.update(worksheet="Sheet1", data=df)
-                    st.warning("ጥያቄው ተሰርዟል!")
-                    st.rerun()
+                # የውሳኔ መስጫ ክፍሎች
+                col_rem, col_btn1, col_btn2 = st.columns([2, 1, 1])
+                with col_rem:
+                    rem = st.text_input("ማሳሰቢያ", key=f"r_{index}", placeholder="አስተያየት ይጻፉ...")
+                with col_btn1:
+                    if st.button("✅ አጽድቅ", key=f"a_{index}", use_container_width=True):
+                        df.at[index, 'Status'] = 'Approved'
+                        df.at[index, 'Remark'] = rem
+                        conn.update(worksheet="Sheet1", data=df)
+                        st.rerun()
+                with col_btn2:
+                    if st.button("❌ ሰርዝ", key=f"c_{index}", use_container_width=True):
+                        df.at[index, 'Status'] = 'Cancelled'
+                        df.at[index, 'Remark'] = rem
+                        conn.update(worksheet="Sheet1", data=df)
+                        st.rerun()
+            
             if len(pending) == 0:
-                st.info("አዲስ የሚጠበቅ ጥያቄ የለም።")
+                st.success("✅ ሁሉም ጥያቄዎች ታይተዋል! አዲስ ጥያቄ የለም።")
         else:
             st.info("ምንም አይነት መዝገብ አልተገኘም።")
     elif admin_password:
@@ -248,5 +267,6 @@ elif page == "📊 ዳሽቦርድ":
         
    # else:
         #st.info("ለማሳየት የሚበቃ ዳታ በ 'Sheet1' ላይ እስካሁን አልተመዘገበም።")
+
 
 
