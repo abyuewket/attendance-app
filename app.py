@@ -7,14 +7,63 @@ from streamlit_gsheets import GSheetsConnection
 # --- የገጽ አቀማመጥ ---
 st.set_page_config(page_title="የሰራተኞች አቴንዳንስ ሲስተም", page_icon="🏢", layout="wide")
 
-# --- 1. CSS (ለዲዛይን) ---
+# --- የዲዛይን ማስተካከያ (CSS) ---
 st.markdown("""
     <style>
-    .stApp { background-color: #ffffff; }
-    h1, h2, h3 { color: #1e3d59 !important; font-weight: 800 !important; }
-    .header-box { background-color: #f1f4f9; padding: 15px; border-radius: 8px; border-left: 5px solid #007bff; margin-bottom: 20px; }
-    .stButton > button { width: 100%; border-radius: 6px; height: 3em; background-color: #007bff; color: white; font-weight: bold; }
-    [data-testid="stSidebar"] { background-image: linear-gradient(#1e3d59, #17252a); color: white !important; }
+    /* 1. የጎን ማውጫ (Sidebar) ዲዛይን */
+    [data-testid="stSidebar"] {
+        background-image: linear-gradient(#111b21, #1e3d59) !important;
+        color: white !important;
+    }
+
+    /* 2. 'ሲስተም ሜኑ' ጽሑፍ */
+    .sidebar-title {
+        color: #00d4ff !important;
+        font-size: 35px !important;
+        font-weight: bold !important;
+        text-align: center;
+        padding: 20px 0px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* 3. ዋናው ገጽ ጀርባ (ነጭ) */
+    .stApp {
+        background-color: #ffffff;
+    }
+    
+    /* 4. አርዕስቶች */
+    h1, h2, h3 {
+        color: #1e3d59 !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* 5. የቁልፍ (Button) ዲዛይን */
+    .stButton > button {
+        width: 100%;
+        border-radius: 10px;
+        height: 3.5em;
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        border: none;
+        transition: 0.3s;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .stButton > button:hover {
+        background-color: #0056b3;
+        box-shadow: 0px 6px 10px rgba(0,0,0,0.2);
+    }
+
+    /* 6. የካርድ ዲዛይን (ለማናጀር ገጽ) */
+    .request-card {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 6px solid #007bff;
+        margin-bottom: 15px;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -41,8 +90,9 @@ staff_df = load_staff_list()
 
 # --- የጎን ማውጫ ---
 with st.sidebar:
-    st.markdown("<div style='text-align: center;'><span style='font-size: 30px; font-weight: bold; color: #00d4ff;'>🏢 ሲስተም ሜኑ</span></div>", unsafe_allow_html=True)
+    st.markdown('<p class="sidebar-title">🏢 ሲስተም ሜኑ</p>', unsafe_allow_html=True)
     st.markdown("---")
+    # ... ሌላው ኮድህ ይቀጥላል
     page = st.radio("ገጽ ይምረጡ", ["🏠 የሰራተኞች መሙያ", "🔐 የማናጀር ገጽ", "📊 ዳሽቦርድ"])
     st.markdown("---")
     st.info("📅 February 2026 | Version 2.0")
@@ -147,3 +197,4 @@ elif page == "📊 ዳሽቦርድ":
         st.plotly_chart(px.pie(df, names='Reason', title='የፈቃድ/የመቅረት ምክንያቶች'), use_container_width=True)
     else:
         st.info("ዳታ አልተገኘም።")
+
