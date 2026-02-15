@@ -233,15 +233,35 @@ elif page == "🔐 የማናጀር ገጽ":
         st.info("እባክዎ መቆጣጠሪያውን ለመክፈት ፓስወርድ ያስገቡ።")
 # --- ገጽ 3: ዳሽቦርድ ---
 elif page == "📊 ዳሽቦርድ":
+    st.markdown("""
+        <style>
+        [data-testid="stMetricValue"] { color: #007bff !important; font-weight: bold !important; }
+        [data-testid="stMetricLabel"] { color: #2c3e50 !important; font-size: 1.1rem !important; }
+        h1 { color: #1e3d59 !important; text-align: center; }
+        </style>
+        """, unsafe_allow_html=True)
+
     st.markdown("<h1>📊 የክትትል ዳሽቦርድ</h1>", unsafe_allow_html=True)
-    df = conn.read(worksheet="Sheet1", ttl=0)
-    if not df.empty:
-        col1, col2, col3 = st.columns(3)
-        col1.metric("ጠቅላላ ጥያቄ", len(df))
-        col2.metric("የጸደቁ ✅", len(df[df['Status'] == 'Approved']))
-        col3.metric("በሂደት ላይ ⏳", len(df[df['Status'] == 'Pending']))
-        st.plotly_chart(px.pie(df, names='Reason', title='የፈቃድ/የመቅረት ምክንያቶች'), use_container_width=True)
+    st.markdown("---")
+    
+    df = conn.read(ttl=0)
+    
+    if not df.empty and 'Status' in df.columns:
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("ጠቅላላ ጥያቄ", len(df))
+        # በሊስት ውስጥ 'Approved' መኖሩን ቼክ ማድረግ
+        m2.metric("የጸደቁ ✅", len(df[df['Status'] == 'Approved']))
+        m3.metric("የተሰረዙ ❌", len(df[df['Status'] == 'Cancelled']))
+        m4.metric("በሂደት ላይ ⏳", len(df[df['Status'] == 'Pending']))
+        
+        st.markdown("---")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.plotly_chart(px.pie(df, names='Reason', title='የቀሩበት ምክንያቶች', hole=0.4), use_container_width=True)
+        with c2:
+            st.plotly_chart(px.bar(df, x='Status', title='የውሳኔዎች ሁኔታ', color='Status',
+                                  color_discrete_map={'Approved':'#28a745', 'Cancelled':'#dc3545', 'Pending':'#ffc107'}), use_container_width=True)
     else:
-        st.info("ዳታ አልተገኘም።")
+        st.info("ለማሳየት የሚበቃ ዳታ እስካሁን አልተመዘገበም።")
 
 
