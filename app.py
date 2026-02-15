@@ -93,19 +93,27 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 2. ዳታ መጫኛ ---
-@st.cache_data
+# --- 2. ዳታ መጫኛ (ከጎግል ሺት ብቻ) ---
+@st.cache_data(ttl=0)  # ttl=0 ሁልጊዜ አዲስ መረጃ እንዲያመጣ ያደርገዋል
 def load_staff_list():
     try:
-        return pd.read_csv("employees.csv", encoding='utf-8-sig')
-    except:
-        return pd.DataFrame(columns=['Employee_ID', 'Full_Name', 'Email'])
+        # የጎግል ሺት ግንኙነት መፍጠር
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        
+        # "StaffList" ከተባለው ገጽ ላይ ዳታውን ማንበብ
+        staff_data = conn.read(worksheet="StaffList", ttl=0)
+        
+        # ኮለምኖቹ ባዶ አለመሆናቸውን ማረጋገጥ
+        if staff_data.empty:
+            return pd.DataFrame(columns=['ID', 'Name'])
+        return staff_data
+    except Exception as e:
+        st.error(f"ከጎግል ሺት ጋር መገናኘት አልተቻለም: {e}")
+        return pd.DataFrame(columns=['ID', 'Name'])
 
+# ዳታውን መጫን
 staff_df = load_staff_list()
-try:
-    conn = st.connection("gsheets", type=GSheetsConnection)
-except:
-    st.error("ከጎግል ሺት ጋር መገናኘት አልተቻለም።")
-
+conn = st.connection("gsheets", type=GSheetsConnection)
 # --- የጎን ማውጫ ማሳመሪያ ---
 
 with st.sidebar:
@@ -381,4 +389,5 @@ elif page == "📊 ዳሽቦርድ":
             st.plotly_chart(px.bar(df, x='Status', title='የውሳኔዎች ሁኔታ', color='Status',
                                   color_discrete_map={'Approved':'#28a745', 'Cancelled':'#dc3545', 'Pending':'#ffc107'}), use_container_width=True)
     else:
+
         st.info("ለማሳየት የሚበቃ ዳታ እስካሁን አልተመዘገበም።")
