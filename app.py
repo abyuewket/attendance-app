@@ -7,63 +7,14 @@ from streamlit_gsheets import GSheetsConnection
 # --- የገጽ አቀማመጥ ---
 st.set_page_config(page_title="የሰራተኞች አቴንዳንስ ሲስተም", page_icon="🏢", layout="wide")
 
-# --- የዲዛይን ማስተካከያ (CSS) ---
+# --- 1. CSS (ለዲዛይን) ---
 st.markdown("""
     <style>
-    /* 1. የጎን ማውጫ (Sidebar) ዲዛይን */
-    [data-testid="stSidebar"] {
-        background-image: linear-gradient(#111b21, #1e3d59) !important;
-        color: white !important;
-    }
-
-    /* 2. 'ሲስተም ሜኑ' ጽሑፍ */
-    .sidebar-title {
-        color: #00d4ff !important;
-        font-size: 35px !important;
-        font-weight: bold !important;
-        text-align: center;
-        padding: 20px 0px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    /* 3. ዋናው ገጽ ጀርባ (ነጭ) */
-    .stApp {
-        background-color: #ffffff;
-    }
-    
-    /* 4. አርዕስቶች */
-    h1, h2, h3 {
-        color: #1e3d59 !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    /* 5. የቁልፍ (Button) ዲዛይን */
-    .stButton > button {
-        width: 100%;
-        border-radius: 10px;
-        height: 3.5em;
-        background-color: #007bff;
-        color: white;
-        font-weight: bold;
-        border: none;
-        transition: 0.3s;
-        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .stButton > button:hover {
-        background-color: #0056b3;
-        box-shadow: 0px 6px 10px rgba(0,0,0,0.2);
-    }
-
-    /* 6. የካርድ ዲዛይን (ለማናጀር ገጽ) */
-    .request-card {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 12px;
-        border-left: 6px solid #007bff;
-        margin-bottom: 15px;
-        box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
-    }
+    .stApp { background-color: #ffffff; }
+    h1, h2, h3 { color: #1e3d59 !important; font-weight: 800 !important; }
+    .header-box { background-color: #f1f4f9; padding: 15px; border-radius: 8px; border-left: 5px solid #007bff; margin-bottom: 20px; }
+    .stButton > button { width: 100%; border-radius: 6px; height: 3em; background-color: #007bff; color: white; font-weight: bold; }
+    [data-testid="stSidebar"] { background-image: linear-gradient(#1e3d59, #17252a); color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -90,9 +41,8 @@ staff_df = load_staff_list()
 
 # --- የጎን ማውጫ ---
 with st.sidebar:
-    st.markdown('<p class="sidebar-title">🏢 ሲስተም ሜኑ</p>', unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center;'><span style='font-size: 30px; font-weight: bold; color: #00d4ff;'>🏢 ሲስተም ሜኑ</span></div>", unsafe_allow_html=True)
     st.markdown("---")
-    # ... ሌላው ኮድህ ይቀጥላል
     page = st.radio("ገጽ ይምረጡ", ["🏠 የሰራተኞች መሙያ", "🔐 የማናጀር ገጽ", "📊 ዳሽቦርድ"])
     st.markdown("---")
     st.info("📅 February 2026 | Version 2.0")
@@ -155,113 +105,45 @@ if page == "🏠 የሰራተኞች መሙያ":
 
 # --- ገጽ 2: የማናጀር ገጽ ---
 elif page == "🔐 የማናጀር ገጽ":
-    # ለጽሑፍ ግልጽነት የሚረዳ CSS
-    st.markdown("""
-        <style>
-        .request-card {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 5px solid #007bff;
-            margin-bottom: 10px;
-            color: #212529 !important;
-        }
-        .request-card b { color: #1e3d59; }
-        </style>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<h1 style='color: #1e3d59;'>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1>", unsafe_allow_html=True)
-    st.markdown("---")
-    
+    st.markdown("<h1>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1>", unsafe_allow_html=True)
     admin_password = st.text_input("የአስተዳዳሪ ፓስወርድ ያስገቡ", type="password")
     
-    # 1. ተጠቃሚው ፓስወርድ ማስገባቱን ማረጋገጥ
-    if admin_password:
-        correct_pwd = st.secrets.get("admin_password", "1234")
-        
-        # 2. ፓስወርዱ ትክክል ከሆነ የሚሰራው ክፍል
-        if admin_password == correct_pwd:
-            df = conn.read(ttl=0)
+    if admin_password == st.secrets.get("admin_password", "1234"):
+        df = conn.read(worksheet="Sheet1", ttl=0)
+        if not df.empty:
+            pending = df[df['Status'] == 'Pending']
+            st.subheader(f"📬 የሚጠባበቁ ጥያቄዎች ({len(pending)})")
             
-            if not df.empty and 'Status' in df.columns:
-                pending = df[df['Status'] == 'Pending']
-                
-                st.subheader(f"📬 የተጠየቁ  ጥያቄዎች ({len(pending)})")
-                if not pending.empty:
-                    for index, row in pending.iterrows():
-                        st.markdown(f"""
-                            <div class="request-card">
-                                <b>👤 ሰራተኛ:</b> {row['Full Name']}<br>
-                                <b>📅 ቀን:</b> {row['Date']}<br>
-                                <b>❓ ምክንያት:</b> {row['Reason']}<br>
-                                <b>📝 ዝርዝር:</b> {row['Details']}
-                            </div>
-                        """, unsafe_allow_html=True)
-                        
-                        rem = st.text_input("ማሳሰቢያ (Remark)", key=f"r_{index}")
-                        c1, c2 = st.columns(2)
-                        
-                        if c1.button("✅ አጽድቅ", key=f"a_{index}"):
-                            df.at[index, 'Status'] = 'Approved'
-                            df.at[index, 'Remark'] = rem
-                            conn.update(data=df)
-                            st.success("ጸድቋል!")
-                            st.rerun()
-
-                        if c2.button("❌ ሰርዝ", key=f"c_{index}"):
-                            df.at[index, 'Status'] = 'Cancelled'
-                            df.at[index, 'Remark'] = rem
-                            conn.update(data=df)
-                            st.warning("ተሰርዟል!")
-                            st.rerun()
-                else:
-                    st.info("አዲስ የሚጠበቅ ጥያቄ የለም።")
-                
-                st.markdown("---")
-                st.subheader("📥 ሪፖርት ማውጫ")
-                csv = df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button("📊 ሙሉ ሪፖርት አውርድ (Excel/CSV)", data=csv, file_name=f"Attendance_Report_{date.today()}.csv", mime="text/csv")
-            else:
-                st.warning("ምንም ዳታ አልተገኘም።")
-        
-        # 3. ፓስወርዱ ስህተት ከሆነ የሚታይ መልእክት
+            for index, row in pending.iterrows():
+                with st.expander(f"👤 {row['Full Name']} - {row['Reason']}"):
+                    st.write(f"**መለያ:** {row['ID']} | **ቀን:** {row['Date']}")
+                    st.write(f"**ዝርዝር:** {row['Details']}")
+                    rem = st.text_input("ማሳሰቢያ (Remark)", key=f"rem_{index}")
+                    c1, c2 = st.columns(2)
+                    if c1.button("✅ አጽድቅ", key=f"app_{index}"):
+                        df.at[index, 'Status'] = 'Approved'
+                        df.at[index, 'Remark'] = rem
+                        conn.update(worksheet="Sheet1", data=df)
+                        st.rerun()
+                    if c2.button("❌ ሰርዝ", key=f"rej_{index}"):
+                        df.at[index, 'Status'] = 'Cancelled'
+                        df.at[index, 'Remark'] = rem
+                        conn.update(worksheet="Sheet1", data=df)
+                        st.rerun()
         else:
-            st.error("❌ You inserted incorrect password. Please try again.")
-            
-    else:
-        # ፓስወርድ ገና ሳይገባ የሚታይ መመሪያ
-        st.info("እባክዎ መቆጣጠሪያውን ለመክፈት ፓስወርድ ያስገቡ።")
+            st.info("ምንም ዳታ የለም።")
+    elif admin_password:
+        st.error("❌ የተሳሳተ ፓስወርድ!")
+
 # --- ገጽ 3: ዳሽቦርድ ---
 elif page == "📊 ዳሽቦርድ":
-    st.markdown("""
-        <style>
-        [data-testid="stMetricValue"] { color: #007bff !important; font-weight: bold !important; }
-        [data-testid="stMetricLabel"] { color: #2c3e50 !important; font-size: 1.1rem !important; }
-        h1 { color: #1e3d59 !important; text-align: center; }
-        </style>
-        """, unsafe_allow_html=True)
-
     st.markdown("<h1>📊 የክትትል ዳሽቦርድ</h1>", unsafe_allow_html=True)
-    st.markdown("---")
-    
-    df = conn.read(ttl=0)
-    
-    if not df.empty and 'Status' in df.columns:
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("ጠቅላላ ጥያቄ", len(df))
-        # በሊስት ውስጥ 'Approved' መኖሩን ቼክ ማድረግ
-        m2.metric("የጸደቁ ✅", len(df[df['Status'] == 'Approved']))
-        m3.metric("የተሰረዙ ❌", len(df[df['Status'] == 'Cancelled']))
-        m4.metric("በሂደት ላይ ⏳", len(df[df['Status'] == 'Pending']))
-        
-        st.markdown("---")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.plotly_chart(px.pie(df, names='Reason', title='የቀሩበት ምክንያቶች', hole=0.4), use_container_width=True)
-        with c2:
-            st.plotly_chart(px.bar(df, x='Status', title='የውሳኔዎች ሁኔታ', color='Status',
-                                  color_discrete_map={'Approved':'#28a745', 'Cancelled':'#dc3545', 'Pending':'#ffc107'}), use_container_width=True)
+    df = conn.read(worksheet="Sheet1", ttl=0)
+    if not df.empty:
+        col1, col2, col3 = st.columns(3)
+        col1.metric("ጠቅላላ ጥያቄ", len(df))
+        col2.metric("የጸደቁ ✅", len(df[df['Status'] == 'Approved']))
+        col3.metric("በሂደት ላይ ⏳", len(df[df['Status'] == 'Pending']))
+        st.plotly_chart(px.pie(df, names='Reason', title='የፈቃድ/የመቅረት ምክንያቶች'), use_container_width=True)
     else:
-        st.info("ለማሳየት የሚበቃ ዳታ እስካሁን አልተመዘገበም።")
-
-
+        st.info("ዳታ አልተገኘም።")
