@@ -125,23 +125,23 @@ if page == "🏠 የሰራተኞች መሙያ":
             if is_valid:
                 staff_name = staff_df[staff_df['Employee_ID'].astype(str) == emp_id]['Full Name'].values[0]
                 st.info(f"👤 ሰራተኛ፦ **{staff_name}**")
-            else:
+             else:
             # ሰራተኛው በዝርዝሩ ውስጥ ካልተገኘ የሚመጣው ማስጠንቀቂያ
-                st.markdown(f"""
-                    <div style="
-                        background-color: #ffe5e5; 
-                        color: #d8000c; 
-                        padding: 20px; 
-                        border-radius: 12px; 
-                        border: 2px solid #d8000c;
-                        text-align: center; 
-                        font-weight: bold;
-                        font-size: 1.1rem;
-                        box-shadow: 0px 4px 10px rgba(216, 0, 12, 0.1);
-                        margin-top: 20px;
+            st.markdown(f"""
+                <div style="
+                    background-color: #ffe5e5; 
+                    color: #d8000c; 
+                    padding: 20px; 
+                    border-radius: 12px; 
+                    border: 2px solid #d8000c;
+                    text-align: center; 
+                    font-weight: bold;
+                    font-size: 1.1rem;
+                    box-shadow: 0px 4px 10px rgba(216, 0, 12, 0.1);
+                    margin-top: 20px;
                 ">
-                       ❌ ይህ መለያ ቁጥር ከሰራተኞች ዝርዝር የለም!! <br>
-                        እባክዎ መለያ ቁጥሩን በትክክል ያስገቡ!
+                    ❌ ይህ መለያ ቁጥር ከሰራተኞች ዝርዝር የለም!! <br>
+                    እባክዎ መለያ ቁጥሩን በትክክል ያስገቡ!
                 </div>
             """, unsafe_allow_html=True)   
                 
@@ -348,9 +348,6 @@ elif page == "📊 ዳሽቦርድ":
         
    # else:
         #st.info("ለማሳየት የሚበቃ ዳታ በ 'Sheet1' ላይ እስካሁን አልተመዘገበም።")
-
-
-
 
 
 
