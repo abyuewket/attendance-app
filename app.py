@@ -237,5 +237,3 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
-
-
