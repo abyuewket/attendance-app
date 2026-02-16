@@ -10,12 +10,91 @@ st.set_page_config(page_title="የሰራተኞች አቴንዳንስ", page_icon
 # --- 1. CSS Styles ---
 st.markdown("""
     <style>
-    [data-testid="stSidebar"] { background-color: #111b21 !important; background-image: linear-gradient(#111b21, #1e3d59) !important; }
-    .sidebar-title { color: #00d4ff !important; font-size: 28px !important; font-weight: 800 !important; text-align: center; padding: 20px 0px; }
-    .stApp { background-color: #ffffff; }
-    .header-box { background-color: #f0f7ff; padding: 20px; border-radius: 15px; border-left: 10px solid #007bff; margin-bottom: 25px; }
-    .header-box h1 { color: #1e3d59 !important; margin: 0; }
-    .request-card { background-color: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e1e8f0; border-left: 8px solid #00d4ff; margin-bottom: 10px; box-shadow: 0px 4px 6px rgba(0,0,0,0.05); }
+    /* 1. ጠቅላላ ገጽታ */
+    .stApp {
+        background-color: #f8faff;
+    }
+
+    /* 2. የግራ ማውጫ (Sidebar) ዲዛይን */
+    [data-testid="stSidebar"] {
+        background-color: #111b21 !important;
+        background-image: linear-gradient(180deg, #111b21 0%, #1e3d59 100%) !important;
+        border-right: 1px solid #00d4ff;
+    }
+    
+    /* በSidebar ውስጥ ያሉት የሬዲዮ በተኖች */
+    div[data-testid="stRadio"] div[role="radiogroup"] > label {
+        background-color: rgba(255, 255, 255, 0.05);
+        margin: 10px 0px;
+        padding: 15px !important;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        transition: 0.3s all;
+    }
+    
+    div[data-testid="stRadio"] div[role="radiogroup"] > label:hover {
+        background-color: rgba(0, 212, 255, 0.1);
+        border: 1px solid #00d4ff;
+    }
+
+    /* 3. የአርዕስት ሳጥን (Header Box) */
+    .header-box {
+        background: linear-gradient(90deg, #1e3d59 0%, #007bff 100%);
+        padding: 30px;
+        border-radius: 20px;
+        color: white !important;
+        text-align: center;
+        margin-bottom: 35px;
+        box-shadow: 0px 10px 20px rgba(0, 123, 255, 0.2);
+    }
+    .header-box h1 {
+        color: white !important;
+        font-weight: 800 !important;
+        letter-spacing: 1px;
+    }
+
+    /* 4. የማናጀር ገጽ ካርዶች (Request Cards) */
+    .request-card {
+        background-color: white;
+        padding: 25px;
+        border-radius: 18px;
+        border: none;
+        border-left: 10px solid #00d4ff;
+        margin-bottom: 20px;
+        box-shadow: 0px 6px 15px rgba(0,0,0,0.05);
+        transition: 0.3s;
+    }
+    .request-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 12px 25px rgba(0,0,0,0.1);
+    }
+
+    /* 5. የዳሽቦርድ ሜትሪክስ (Metrics) */
+    div[data-testid="stMetric"] {
+        background-color: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.03);
+        border-bottom: 4px solid #007bff;
+    }
+
+    /* 6. የጽሑፍ ግብዓቶች (Inputs) */
+    .stTextInput input, .stSelectbox div, .stTextArea textarea {
+        border-radius: 12px !important;
+        border: 1px solid #e0e0e0 !important;
+        padding: 10px !important;
+    }
+
+    /* 7. ዋናው በተን (Button) */
+    .stButton > button {
+        background: linear-gradient(45deg, #007bff, #00d4ff);
+        border: none;
+        color: white;
+        font-weight: bold;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0px 5px 15px rgba(0, 212, 255, 0.4);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -158,3 +237,4 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
