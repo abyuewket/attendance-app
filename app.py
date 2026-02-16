@@ -183,21 +183,20 @@ if page == "🏠 የሰራተኞች መሙያ":
 
                         # 3. ምዝገባን መወሰን
                         if is_duplicate:
-    st.markdown(f"""
-        <div style="
-            background-color: #ff4b4b; 
-            color: white; 
-            padding: 15px; 
-            border-radius: 10px; 
-            text-align: center; 
-            font-weight: bold;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        ">
-            ⚠️ ጥያቄው አልተመዘገበም!<br>
-            ሰራተኛው በ {conflict_info} ሰዓት ውስጥ ቀደም ሲል ሌላ ጥያቄ አቅርቧል።
-        </div>
-        <br>
-    """, unsafe_allow_html=True)
+                           st.markdown(f"""
+                              <div style="
+                                 background-color: #ff4b4b; 
+                                 color: white; 
+                                 padding: 15px; 
+                                 border-radius: 10px; 
+                                 text-align: center; 
+                                 font-weight: bold;
+                                 box-shadow: 0px 4px 10px rgba(0,0,0,0.1); ">
+                                 ⚠️ ጥያቄው አልተመዘገበም!<br>
+                                 ሰራተኛው በ {conflict_info} ሰዓት ውስጥ ቀደም ሲል ሌላ ጥያቄ አቅርቧል።
+                             </div>
+                               <br>
+                          """, unsafe_allow_html=True)
                         else:
                             # አዲስ መዝገብ ማዘጋጀት
                             new_row = pd.DataFrame([{
