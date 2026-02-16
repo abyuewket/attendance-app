@@ -138,23 +138,66 @@ if page == "🏠 የሰራተኞች መሙያ":
                 details = st.text_area("ዝርዝር መግለጫ (አስፈላጊ ከሆነ)")
 
                 if st.button("🚀 ጥያቄውን መዝግብ"):
-                    all_data = conn.read(worksheet="Sheet1", ttl=0)
-                    new_row = pd.DataFrame([{
-                        "Full Name": staff_name, "ID": emp_id, "Reason": reason,
-                        "Details": details, "Status": "Pending", "Remark": "",
-                        "Date": start_date.strftime('%Y-%m-%d'),
-                        "Start_Time": start_time.strftime('%H:%M:%S'),
-                        "End_Time": end_time.strftime('%H:%M:%S'),
-                        "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    }])
-                    updated_df = pd.concat([all_data, new_row], ignore_index=True)
-                    conn.update(worksheet="Sheet1", data=updated_df)
-                    st.balloons()
-                    st.success("✅ ጥያቄዎ በትክክል ተመዝግቧል!")
-            else:
-                st.error("❌ የሰራተኛ መለያ ቁጥር አልተገኘም!")
+                    current_start = datetime.combine(start_date, start_time)
+                    current_end = datetime.combine(end_date, end_time)
+                    
+                    if current_start >= current_end:
+                        st.error("❌ ስህተት፦ መነሻ ሰዓት ከመድረሻ ሰዓት ቀደም ማለት አለበት!")
+                    else:
+                        # 1. ዳታውን ማንበብ
+                        all_data = conn.read(worksheet="Sheet1", ttl=0)
+                        
+                        is_duplicate = False
+                        conflict_details = ""
 
-# --- ገጽ 2: የማናጀር ገጽ ---
+                        if not all_data.empty:
+                            # 2. የሰራተኛውን መለያ በጽሑፍ (String) መቀየር (ለማነጻጸር እንዲመች)
+                            user_records = all_data[all_data['ID'].astype(str) == str(emp_id)]
+                            
+                            for _, record in user_records.iterrows():
+                                try:
+                                    # ቀኑን እና ሰዓቱን ወደ ትክክለኛ የPython DateTime መቀየር
+                                    row_date = str(record['Date'])
+                                    row_start = str(record['Start_Time'])
+                                    row_end = str(record['End_Time'])
+                                    
+                                    # የቆየውን መዝገብ ሰዓት ማዘጋጀት (ሰከንድ ቢኖርም ባይኖርም እንዲሰራ)
+                                    prev_start = datetime.strptime(f"{row_date} {row_start}", '%Y-%m-%d %H:%M:%S')
+                                    prev_end = datetime.strptime(f"{row_date} {row_end}", '%Y-%m-%d %H:%M:%S')
+                                    
+                                    # 🔍 የሰዓት መደራረብ ቼክ (Interval Overlap Logic)
+                                    # ቀመሩ፡ (StartA < EndB) AND (EndA > StartB)
+                                    if current_start < prev_end and current_end > prev_start:
+                                        # ጥያቄው "Approved" ወይም "Pending" ከሆነ ብቻ እንዲከለክል ማድረግ ትችላለህ
+                                        # ጥያቄው ተሰርዞ (Cancelled) ከሆነ ግን ድጋሚ እንዲጠይቅ መፍቀድ ከፈለግክ እዚህ ጋር 'Status' ቼክ አድርግ
+                                        if record['Status'] != 'Cancelled':
+                                            is_duplicate = True
+                                            conflict_details = f"{row_date} ({row_start} - {row_end})"
+                                            break
+                                except Exception as e:
+                                    continue
+
+                        # 3. ምዝገባ
+                        if is_duplicate:
+                            st.warning(f"⚠️ ጥያቄዎ አልተመዘገበም! በ {conflict_details} ሰዓት ውስጥ ሌላ ጥያቄ አቅርበዋል።")
+                        else:
+                            new_row = pd.DataFrame([{
+                                "Full Name": staff_name,
+                                "ID": emp_id,
+                                "Reason": reason,
+                                "Details": details,
+                                "Status": "Pending",
+                                "Remark": "",
+                                "Date": start_date.strftime('%Y-%m-%d'),
+                                "Start_Time": start_time.strftime('%H:%M:%S'),
+                                "End_Time": end_time.strftime('%H:%M:%S'),
+                                "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            }])
+                            
+                            updated_df = pd.concat([all_data, new_row], ignore_index=True)
+                            conn.update(worksheet="Sheet1", data=updated_df)
+                            st.balloons()
+                            st.success("✅ ጥያቄዎ በትክክል ተመዝግቧል!")
 # --- ገጽ 2: የማናጀር ገጽ ---
 elif page == "🔐 የማናጀር ገጽ":
     # የአርዕስት ሳጥን ከደማቅ ሰማያዊ መስመር ጋር
@@ -267,6 +310,7 @@ elif page == "📊 ዳሽቦርድ":
         
    # else:
         #st.info("ለማሳየት የሚበቃ ዳታ በ 'Sheet1' ላይ እስካሁን አልተመዘገበም።")
+
 
 
 
