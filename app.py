@@ -6,87 +6,6 @@ from streamlit_gsheets import GSheetsConnection
 
 # --- የገጽ አቀማመጥ ---
 st.set_page_config(page_title="የሰራተኞች አቴንዳንስ", page_icon="🏢", layout="wide")
-# 1. መጀመሪያ የገጽ አቀማመጥ (ይህ የግድ መጀመሪያ መሆን አለበት)
-st.set_page_config(page_title="የሰራተኞች አቴንዳንስ", page_icon="🏢", layout="wide")
-
-# 2. ዲዛይኑ በሁሉም ብራውዘር እኩል እንዲታይ የሚያደርግ ኮድ
-st.markdown("""
-    <style>
-    /* ሁሉንም ብራውዘር አንድ አይነት ቀለም እንዲጠቀሙ ማስገደድ (Force Uniform Colors) */
-    :root {
-        --primary-color: #7700ff;
-    }
-
-    /* 1. የጎን ማውጫ (Sidebar) ጀርባ */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #111b21 0%, #1b263b 100%) !important;
-        min-width: 300px !important;
-    }
-
-    /* 2. "ገጽ ይምረጡ" አርዕስት ካርድ */
-    div[data-testid="stSidebar"] .stRadio > label {
-        background: linear-gradient(90deg, #007bff, #00d4ff) !important;
-        color: white !important;
-        padding: 15px !important;
-        border-radius: 12px !important;
-        font-weight: 800 !important;
-        font-size: 1.2rem !important;
-        text-align: center !important;
-        display: block !important;
-        margin-bottom: 20px !important;
-        box-shadow: 0px 4px 15px rgba(0,0,0,0.3) !important;
-    }
-
-    /* 3. የሬዲዮ ምርጫ ካርዶች (Menu Cards) */
-    div[data-testid="stRadio"] div[role="radiogroup"] > label {
-        background-color: #ffffff !important;
-        padding: 18px 20px !important;
-        border-radius: 12px !important;
-        margin-bottom: 12px !important;
-        border: 2px solid transparent !important;
-        box-shadow: 0px 4px 6px rgba(0,0,0,0.1) !important;
-        transition: all 0.3s ease !important;
-    }
-
-    /* በካርዶቹ ውስጥ ያለውን ጽሑፍ በግልጽ ማሳያ (ለጓደኞችህ የጠፋው ይሄ ነው) */
-    div[data-testid="stRadio"] div[role="radiogroup"] > label p {
-        color: #1e3d59 !important; /* ደማቅ ሰማያዊ ጽሑፍ */
-        font-size: 1.05rem !important;
-        font-weight: 600 !important;
-        opacity: 1 !important;
-    }
-
-    /* የተመረጠው ካርድ (Active Card) */
-    div[data-testid="stRadio"] div[role="radiogroup"] > label[data-selected="true"] {
-        border: 3px solid #00d4ff !important;
-        background-color: #f0faff !important;
-        transform: scale(1.02);
-    }
-
-    /* 4. የዳሽቦርድ ሜትሪክስ ቁጥሮች (Metrics Fix) */
-    [data-testid="stMetricValue"] {
-        color: #1e3d59 !important;
-        font-weight: 800 !important;
-    }
-    
-    [data-testid="stMetricLabel"] {
-        color: #555555 !important;
-    }
-
-    div[data-testid="stMetric"] {
-        background-color: white !important;
-        border-radius: 15px !important;
-        padding: 15px !important;
-        border-top: 5px solid #00d4ff !important;
-        box-shadow: 0px 5px 15px rgba(0,0,0,0.05) !important;
-    }
-
-    /* የድሮውን ክብ ምልክት ማጥፋት */
-    div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionStateIndicator"] {
-        display: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 st.markdown("""
     <style>
     /* ከላይ የሰጠሁህን የ CSS ኮድ እዚህ ውስጥ ሙሉውን ኮፒ አድርገህ ጨምረው */
@@ -318,3 +237,5 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
+
