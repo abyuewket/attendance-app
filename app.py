@@ -6,6 +6,17 @@ from streamlit_gsheets import GSheetsConnection
 
 # --- የገጽ አቀማመጥ ---
 st.set_page_config(page_title="የሰራተኞች አቴንዳንስ", page_icon="🏢", layout="wide")
+st.markdown("""
+    <style>
+    /* ከላይ የሰጠሁህን የ CSS ኮድ እዚህ ውስጥ ሙሉውን ኮፒ አድርገህ ጨምረው */
+    [data-testid="stMetricValue"] {
+        color: #1e3d59 !important;
+        font-size: 2.5rem !important;
+        font-weight: 800 !important;
+    }
+    /* ... የቀሩት የዲዛይን ኮዶች ... */
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- 1. CSS Styles ---
 st.markdown("""
@@ -226,5 +237,6 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
