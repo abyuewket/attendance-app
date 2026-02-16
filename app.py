@@ -293,9 +293,6 @@ if page == "🏠 የሰራተኞች መሙያ":
                             conn.update(worksheet="Sheet1", data=updated_df)
                             st.balloons()
                             st.success("✅ ጥያቄው በትክክል ተመዝግቧል!")
-        else:
-            st.error("❌ ይህ መለያ ቁጥር ከሰራተኞች ዝርዝር የለም!!")
-
 # --- ገጽ 2: የማናጀር ገጽ ---
 elif page == "🔐 የማናጀር ገጽ":
     st.markdown("<div class='header-box'><h1>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1></div>", unsafe_allow_html=True)
@@ -345,6 +342,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
