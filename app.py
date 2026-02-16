@@ -10,7 +10,6 @@ st.set_page_config(page_title="የሰራተኞች አቴንዳንስ", page_icon
 # --- 1. ደማቅ እና ግልጽ የሆኑ ቀለሞች (CSS) ---
 st.markdown("""
     <style>
-    /* 1. የጎን ማውጫ (Sidebar) - ደማቅ ጥቁር ሰማያዊ */
     [data-testid="stSidebar"] {
         background-color: #111b21 !important;
         background-image: linear-gradient(#111b21, #1e3d59) !important;
@@ -23,11 +22,7 @@ st.markdown("""
         padding: 20px 0px;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
-
-    /* 2. ዋናው ገጽ ጀርባ - ሙሉ በሙሉ ነጭ */
     .stApp { background-color: #ffffff; }
-
-    /* 3. የአርዕስት ሳጥኖች (Header Boxes) - ጎልቶ የሚታይ */
     .header-box {
         background-color: #f0f7ff;
         padding: 25px;
@@ -36,24 +31,8 @@ st.markdown("""
         margin-bottom: 30px;
         box-shadow: 0px 4px 15px rgba(0,0,0,0.08);
     }
-    .header-box h1 {
-        color: #1e3d59 !important;
-        margin: 0;
-        font-weight: 800 !important;
-    }
-
-    /* 4. የፎርም ሳጥኖች እና ግብዓቶች (Inputs) */
-    label {
-        color: #2c3e50 !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-    }
-    .stTextInput input, .stSelectbox div, .stTextArea textarea {
-        border-radius: 8px !important;
-        border: 1px solid #d1d9e6 !important;
-    }
-
-    /* 5. የቁልፍ (Button) ዲዛይን - ትልቅ እና ደማቅ */
+    .header-box h1 { color: #1e3d59 !important; margin: 0; font-weight: 800 !important; }
+    label { color: #2c3e50 !important; font-weight: 600 !important; font-size: 1.1rem !important; }
     .stButton > button {
         width: 100%;
         border-radius: 10px;
@@ -61,27 +40,9 @@ st.markdown("""
         background-color: #007bff;
         color: white;
         font-weight: bold;
-        font-size: 1.1rem;
         border: none;
-        transition: 0.3s ease;
         box-shadow: 0px 5px 15px rgba(0, 123, 255, 0.3);
     }
-    .stButton > button:hover {
-        background-color: #0056b3;
-        transform: translateY(-2px);
-    }
-
-    /* 6. የማናጀር ገጽ ካርዶች (Request Cards) */
-    .request-card {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #e1e8f0;
-        border-left: 6px solid #00d4ff;
-        margin-bottom: 15px;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
-    }
-    .request-card b { color: #1e3d59; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -94,9 +55,9 @@ def load_staff_list():
         if not staff_data.empty:
             staff_data = staff_data.rename(columns={'ID': 'Employee_ID', 'Name': 'Full Name'})
             return staff_data
-        return pd.DataFrame(columns=['Employee_ID', 'Full Name'])
     except:
-        return pd.DataFrame(columns=['Employee_ID', 'Full Name'])
+        pass
+    return pd.DataFrame(columns=['Employee_ID', 'Full Name'])
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 staff_df = load_staff_list()
@@ -104,255 +65,71 @@ staff_df = load_staff_list()
 # --- 3. የጎን ማውጫ ---
 with st.sidebar:
     st.markdown('<p class="sidebar-title">🏢 ሲስተም ሜኑ</p>', unsafe_allow_html=True)
-    st.markdown("---")
     page = st.radio("ገጽ ይምረጡ", ["🏠 የሰራተኞች መሙያ", "🔐 የማናጀር ገጽ", "📊 ዳሽቦርድ"])
-    st.markdown("---")
-    st.markdown("""
-        <div style='color: #8892b0; font-size: 0.85rem; text-align: center;'>
-            📍 የኢትዮጵያ አቴንዳንስ ሲስተም<br>🚀 Version 2.5
-        </div>
-    """, unsafe_allow_html=True)
 
 # --- ገጽ 1: የሰራተኞች መሙያ ---
 if page == "🏠 የሰራተኞች መሙያ":
     st.markdown("<div class='header-box'><h1>📝 የፈቃድ መጠየቂያ ፎርም</h1></div>", unsafe_allow_html=True)
     
-    with st.container():
-        emp_id = st.text_input("የሰራተኛ መለያ ቁጥር (ID) ያስገቡ", placeholder="ለምሳሌ: 117102").strip()
+    emp_id = st.text_input("የሰራተኛ መለያ ቁጥር (ID) ያስገቡ", placeholder="ለምሳሌ: 117102").strip()
+    
+    if emp_id:
+        # ID ፍለጋ (ሁለቱንም ወደ String በመቀየር)
+        is_valid = str(emp_id).split('.')[0] in staff_df['Employee_ID'].astype(str).str.split('.').str[0].values
         
-        if emp_id:
-            is_valid = emp_id in staff_df['Employee_ID'].astype(str).values
-            if is_valid:
-                staff_name = staff_df[staff_df['Employee_ID'].astype(str) == emp_id]['Full Name'].values[0]
-                st.info(f"👤 ሰራተኛ፦ **{staff_name}**")
-             else:
-            # ሰራተኛው በዝርዝሩ ውስጥ ካልተገኘ የሚመጣው ማስጠንቀቂያ
-            st.markdown(f"""
-                <div style="
-                    background-color: #ffe5e5; 
-                    color: #d8000c; 
-                    padding: 20px; 
-                    border-radius: 12px; 
-                    border: 2px solid #d8000c;
-                    text-align: center; 
-                    font-weight: bold;
-                    font-size: 1.1rem;
-                    box-shadow: 0px 4px 10px rgba(216, 0, 12, 0.1);
-                    margin-top: 20px;
-                ">
-                    ❌ ይህ መለያ ቁጥር ከሰራተኞች ዝርዝር የለም!! <br>
-                    እባክዎ መለያ ቁጥሩን በትክክል ያስገቡ!
-                </div>
-            """, unsafe_allow_html=True)   
+        if is_valid:
+            staff_name = staff_df[staff_df['Employee_ID'].astype(str).str.contains(str(emp_id).split('.')[0])]['Full Name'].values[0]
+            st.info(f"👤 ሰራተኛ፦ **{staff_name}**")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                start_date = st.date_input("መነሻ ቀን", value=date.today())
+                start_time = st.time_input("መነሻ ሰዓት")
+            with col2:
+                end_date = st.date_input("መመለሻ ቀን", value=date.today())
+                end_time = st.time_input("መመለሻ ሰዓት")
+
+            reason = st.selectbox("የጥያቄው ምክንያት", ["ህመም", "ዓመታዊ ፈቃድ", "ቤተሰብ ጉዳይ", "ልዩ ፈቃድ", "ሌላ"])
+            details = st.text_area("ዝርዝር መግለጫ (አስፈላጊ ከሆነ)")
+
+            if st.button("🚀 ጥያቄውን መዝግብ"):
+                current_start = datetime.combine(start_date, start_time)
+                current_end = datetime.combine(end_date, end_time)
                 
-                col1, col2 = st.columns(2)
-                with col1:
-                    start_date = st.date_input("መነሻ ቀን", value=date.today())
-                    start_time = st.time_input("መነሻ ሰዓት")
-                with col2:
-                    end_date = st.date_input("መመለሻ ቀን", value=date.today())
-                    end_time = st.time_input("መመለሻ ሰዓት")
+                if current_start >= current_end:
+                    st.error("❌ ስህተት፦ መነሻ ሰዓት ከመድረሻ ሰዓት ቀደም ማለት አለበት!")
+                else:
+                    all_data = conn.read(worksheet="Sheet1", ttl=0)
+                    is_duplicate = False
+                    conflict_info = ""
 
-                reason = st.selectbox("የጥያቄው ምክንያት", ["ህመም", "ዓመታዊ ፈቃድ", "ቤተሰብ ጉዳይ", "ልዩ ፈቃድ", "ሌላ"])
-                details = st.text_area("ዝርዝር መግለጫ (አስፈላጊ ከሆነ)")
+                    if not all_data.empty:
+                        # የጊዜ መደራረብ ፍተሻ
+                        user_records = all_data[all_data['ID'].astype(str).str.contains(str(emp_id).split('.')[0])]
+                        for _, record in user_records.iterrows():
+                            try:
+                                if str(record['Status']) == "Cancelled": continue
+                                r_date, r_start, r_end = str(record['Date']), str(record['Start_Time']), str(record['End_Time'])
+                                prev_start = datetime.strptime(f"{r_date} {r_start}", '%Y-%m-%d %H:%M:%S')
+                                prev_end = datetime.strptime(f"{r_date} {r_end}", '%Y-%m-%d %H:%M:%S')
+                                
+                                if current_start < prev_end and current_end > prev_start:
+                                    is_duplicate = True
+                                    conflict_info = f"{r_date} ({r_start} - {r_end})"
+                                    break
+                            except: continue
 
-                if st.button("🚀 ጥያቄውን መዝግብ"):
-                    # የአሁኑን ጥያቄ ሰዓት ማዘጋጀት
-                    current_start = datetime.combine(start_date, start_time)
-                    current_end = datetime.combine(end_date, end_time)
-                    
-                    if current_start >= current_end:
-                        st.error("❌ ስህተት፦ መነሻ ሰዓት ከመድረሻ ሰዓት ቀደም ማለት አለበት!")
+                    if is_duplicate:
+                        st.markdown(f'<div style="background-color: #ff4b4b; color: white; padding: 15px; border-radius: 10px; text-align: center;">⚠️ ጥያቄው አልተመዘገበም! ሰራተኛው በ {conflict_info} ሰዓት ውስጥ ጥያቄ አቅርቧል።</div>', unsafe_allow_html=True)
                     else:
-                        # 1. ዳታውን ከ Sheet1 ማንበብ
-                        all_data = conn.read(worksheet="Sheet1", ttl=0)
-                        
-                        is_duplicate = False
-                        conflict_info = ""
+                        new_row = pd.DataFrame([{"Full Name": staff_name, "ID": emp_id, "Reason": reason, "Details": details if details else "ዝርዝር አልተገለጸም", "Status": "Pending", "Remark": "", "Date": start_date.strftime('%Y-%m-%d'), "Start_Time": start_time.strftime('%H:%M:%S'), "End_Time": end_time.strftime('%H:%M:%S'), "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')}])
+                        conn.update(worksheet="Sheet1", data=pd.concat([all_data, new_row], ignore_index=True))
+                        st.balloons()
+                        st.success("✅ ጥያቄው በትክክል ተመዝግቧል!")
+        else:
+            st.markdown('<div style="background-color: #ffe5e5; color: #d8000c; padding: 20px; border-radius: 12px; border: 2px solid #d8000c; text-align: center; font-weight: bold;">❌ ይህ መለያ ቁጥር ከሰራተኞች ዝርዝር የለም!! መለያ ቁጥሩን በትክክል ያስገቡ!!!</div>', unsafe_allow_html=True)
 
-                        if not all_data.empty:
-                            # 2. የዚህን ሰራተኛ መዝገቦች ብቻ መለየት (ID በጽሑፍ መሆኑን ማረጋገጥ)
-                            # በፎቶህ መሰረት ID 117102.0 ሊሆን ስለሚችል ሁለቱንም እናነጻጽራለን
-                            user_records = all_data[all_data['ID'].astype(str).str.contains(str(emp_id).split('.')[0])]
-                            
-                            for _, record in user_records.iterrows():
-                                try:
-                                    # ቀኑን እና ሰዓቱን ከሺቱ ላይ ማንበብ
-                                    r_date = str(record['Date'])
-                                    r_start = str(record['Start_Time'])
-                                    r_end = str(record['End_Time'])
-                                    r_status = str(record['Status'])
-
-                                    # ተሰርዘው (Cancelled) ያለቁ ጥያቄዎችን ችላ እንላለን
-                                    if r_status == "Cancelled":
-                                        continue
-
-                                    # የቆየውን መዝገብ ወደ DateTime መቀየር (ሰከንድ ቢኖርም ባይኖርም)
-                                    prev_start = datetime.strptime(f"{r_date} {r_start}", '%Y-%m-%d %H:%M:%S')
-                                    prev_end = datetime.strptime(f"{r_date} {r_end}", '%Y-%m-%d %H:%M:%S')
-                                    
-                                    # 🔍 ጠንካራ የሰዓት ንጽጽር
-                                    # አዲሱ ጥያቄ ከድሮው መጨረሻ በፊት ከጀመረ እና ከድሮው መጀመሪያ በኋላ ካለቀ Overlap አለ
-                                    if current_start < prev_end and current_end > prev_start:
-                                        is_duplicate = True
-                                        conflict_info = f"{r_date} ({r_start} - {r_end})"
-                                        break
-                                except:
-                                    continue
-
-                        # 3. ምዝገባን መወሰን
-                        if is_duplicate:
-                           st.markdown(f"""
-                              <div style="
-                                 background-color: #ff4b4b; 
-                                 color: white; 
-                                 padding: 15px; 
-                                 border-radius: 10px; 
-                                 text-align: center; 
-                                 font-weight: bold;
-                                 box-shadow: 0px 4px 10px rgba(0,0,0,0.1); ">
-                                 ⚠️ ጥያቄው አልተመዘገበም!<br>
-                                 ሰራተኛው በ {conflict_info} ሰዓት ውስጥ ቀደም ሲል ሌላ ጥያቄ አቅርቧል።
-                             </div>
-                               <br>
-                          """, unsafe_allow_html=True)
-                        else:
-                            # አዲስ መዝገብ ማዘጋጀት
-                            new_row = pd.DataFrame([{
-                                "Full Name": staff_name,
-                                "ID": emp_id,
-                                "Reason": reason,
-                                "Details": details if details else "ዝርዝር አልተገለጸም",
-                                "Status": "Pending",
-                                "Remark": "",
-                                "Date": start_date.strftime('%Y-%m-%d'),
-                                "Start_Time": start_time.strftime('%H:%M:%S'),
-                                "End_Time": end_time.strftime('%H:%M:%S'),
-                                "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                            }])
-                            
-                            updated_df = pd.concat([all_data, new_row], ignore_index=True)
-                            conn.update(worksheet="Sheet1", data=updated_df)
-                            st.balloons()
-                            st.success("✅ ጥያቄው በትክክል ተመዝግቧል!")
-            st.error("❌ ይህ መለያ ቁጥር ከሰራተኞች ዝርዝር የለም!! መለያ ቁጥሩን በትክክል ያስገቡ!!!")             
 # --- ገጽ 2: የማናጀር ገጽ ---
 elif page == "🔐 የማናጀር ገጽ":
-    # የአርዕስት ሳጥን ከደማቅ ሰማያዊ መስመር ጋር
     st.markdown("<div class='header-box'><h1>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1></div>", unsafe_allow_html=True)
-    
     admin_password = st.text_input("የአስተዳዳሪ ፓስወርድ ያስገቡ", type="password")
-    
-    if admin_password == st.secrets.get("admin_password", "1234"):
-        df = conn.read(worksheet="Sheet1", ttl=0)
-        if not df.empty:
-            pending = df[df['Status'] == 'Pending']
-            st.markdown(f"### 📬 የሚጠባበቁ ጥያቄዎች ({len(pending)})")
-            
-            for index, row in pending.iterrows():
-                # አንተ የፈለግከው ዘመናዊ የካርድ ዲዛይን
-                st.markdown(f"""
-                    <div style="
-                        background-color: #ffffff;
-                        padding: 20px;
-                        border-radius: 12px;
-                        border: 1px solid #e1e8f0;
-                        border-left: 8px solid #00d4ff;
-                        margin-bottom: 15px;
-                        box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
-                        font-family: 'Segoe UI', sans-serif;
-                    ">
-                        <div style='color: #1e3d59; font-size: 1.2rem; font-weight: 800; margin-bottom: 8px;'>
-                            👤 ሰራተኛ: {row['Full Name']}
-                        </div>
-                        <div style='color: #4a5568; font-size: 1rem; line-height: 1.6;'>
-                            <b>🆔 መለያ:</b> {row['ID']} | <b>❓ ምክንያት:</b> <span style='color: #e53e3e;'>{row['Reason']}</span><br>
-                            <b>📅 ቀን:</b> {row['Date']} ({row['Start_Time']} - {row['End_Time']})<br>
-                            <b>📝 ዝርዝር:</b> {row['Details'] if str(row['Details']) != 'nan' else 'ዝርዝር አልተገለጸም'}
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                # የውሳኔ መስጫ ክፍሎች
-                col_rem, col_btn1, col_btn2 = st.columns([2, 1, 1])
-                with col_rem:
-                    rem = st.text_input("ማሳሰቢያ", key=f"r_{index}", placeholder="አስተያየት ይጻፉ...")
-                with col_btn1:
-                    if st.button("✅ አጽድቅ", key=f"a_{index}", use_container_width=True):
-                        df.at[index, 'Status'] = 'Approved'
-                        df.at[index, 'Remark'] = rem
-                        conn.update(worksheet="Sheet1", data=df)
-                        st.rerun()
-                with col_btn2:
-                    if st.button("❌ ሰርዝ", key=f"c_{index}", use_container_width=True):
-                        df.at[index, 'Status'] = 'Cancelled'
-                        df.at[index, 'Remark'] = rem
-                        conn.update(worksheet="Sheet1", data=df)
-                        st.rerun()
-            
-            if len(pending) == 0:
-                st.success("✅ ሁሉም ጥያቄዎች ታይተዋል! አዲስ ጥያቄ የለም።")
-        else:
-            st.info("ምንም አይነት መዝገብ አልተገኘም።")
-    elif admin_password:
-        st.error("❌ የተሳሳተ ፓስወርድ!")
-# --- ገጽ 3: ዳሽቦርድ ---
-elif page == "📊 ዳሽቦርድ":
-    st.markdown("""
-        <style>
-        [data-testid="stMetricValue"] { color: #007bff !important; font-weight: bold !important; }
-        [data-testid="stMetricLabel"] { color: #2c3e50 !important; font-size: 1.1rem !important; }
-        h1 { color: #1e3d59 !important; text-align: center; }
-        </style>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<h1>📊 የክትትል ዳሽቦርድ</h1>", unsafe_allow_html=True)
-    st.markdown("---")
-    
-    # ዳታውን ከ Sheet1 (የመመዝገቢያ ገጽ) ማንበብ
-    try:
-        df = conn.read(worksheet="Sheet1", ttl=0)
-    except:
-        df = pd.DataFrame() # ሺቱ ባዶ ከሆነ ወይም ካልተገኘ
-    
-    if not df.empty and 'Status' in df.columns:
-        # ሜትሪክስ (Metrics)
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("ጠቅላላ ጥያቄ", len(df))
-        m2.metric("የጸደቁ ✅", len(df[df['Status'] == 'Approved']))
-        m3.metric("የተሰረዙ ❌", len(df[df['Status'] == 'Cancelled']))
-        m4.metric("በሂደት ላይ ⏳", len(df[df['Status'] == 'Pending']))
-        
-        st.markdown("---")
-        
-        # ቻርቶች (Charts)
-        c1, c2 = st.columns(2)
-        
-        with c1:
-            # የቀሩበት ምክንያቶች በፓይ ቻርት (Pie Chart)
-            if 'Reason' in df.columns:
-                fig_pie = px.pie(df, names='Reason', title='የቀሩበት ምክንያቶች', hole=0.4,
-                                 color_discrete_sequence=px.colors.qualitative.Pastel)
-                st.plotly_chart(fig_pie, use_container_width=True)
-        
-        with c2:
-            # የውሳኔዎች ሁኔታ በባር ቻርት (Bar Chart)
-            status_colors = {'Approved': '#28a745', 'Cancelled': '#dc3545', 'Pending': '#ffc107'}
-            fig_bar = px.bar(df, x='Status', title='የውሳኔዎች ሁኔታ', color='Status',
-                             color_discrete_map=status_colors)
-            st.plotly_chart(fig_bar, use_container_width=True)
-            
-        # ተጨማሪ፡ የሰራተኞች ዝርዝር ሰንጠረዥ
-       # st.markdown("### 📋 የቅርብ ጊዜ መዝገቦች")
-        #st.dataframe(df.tail(10), use_container_width=True)
-        
-   # else:
-        #st.info("ለማሳየት የሚበቃ ዳታ በ 'Sheet1' ላይ እስካሁን አልተመዘገበም።")
-
-
-
-
-
-
-
-
