@@ -14,7 +14,7 @@ st.markdown("""
     <style>
     /* ሁሉንም ብራውዘር አንድ አይነት ቀለም እንዲጠቀሙ ማስገደድ (Force Uniform Colors) */
     :root {
-        --primary-color: #00d4ff;
+        --primary-color: #7700ff;
     }
 
     /* 1. የጎን ማውጫ (Sidebar) ጀርባ */
@@ -318,6 +318,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
