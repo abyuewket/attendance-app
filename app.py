@@ -228,44 +228,71 @@ if page == "🏠 የሰራተኞች መሙያ":
             details = st.text_area("ዝርዝር መግለጫ (አስፈላጊ ከሆነ)")
 
             if st.button("🚀 ጥያቄውን መዝግብ"):
-                current_start = datetime.combine(start_date, start_time)
-                current_end = datetime.combine(end_date, end_time)
-                
-                if current_start >= current_end:
-                    st.error("❌ ስህተት፦ መነሻ ሰዓት ከመድረሻ ሰዓት ቀደም ማለት አለበት!")
-                else:
-                    try:
-                        all_data = conn.read(worksheet="Sheet1", ttl=0)
-                    except:
-                        all_data = pd.DataFrame()
-
-                    # Overlap Check
-                    is_duplicate = False
-                    if not all_data.empty and 'ID' in all_data.columns:
-                        user_records = all_data[all_data['ID'].astype(str).str.contains(clean_id)]
-                        for _, record in user_records.iterrows():
-                            if str(record.get('Status')) == "Cancelled": continue
-                            try:
-                                r_date = str(record['Date'])
-                                prev_s = datetime.strptime(f"{r_date} {record['Start_Time']}", '%Y-%m-%d %H:%M:%S')
-                                prev_e = datetime.strptime(f"{r_date} {record['End_Time']}", '%Y-%m-%d %H:%M:%S')
-                                if current_start < prev_e and current_end > prev_s:
-                                    is_duplicate = True; break
-                            except: continue
-
-                    if is_duplicate:
-                        st.markdown('<div style="background-color: #ff4b4b; color: white; padding: 15px; border-radius: 10px; text-align: center;">⚠️ ጥያቄው አልተመዘገበም! በዛ ሰዓት ሌላ ጥያቄ አለ።</div>', unsafe_allow_html=True)
+                    # የአሁኑን ጥያቄ ሰዓት ማዘጋጀት
+                    current_start = datetime.combine(start_date, start_time)
+                    current_end = datetime.combine(end_date, end_time)
+                    
+                    if current_start >= current_end:
+                        st.error("❌ ስህተት፦ መነሻ ሰዓት ከመድረሻ ሰዓት ቀደም ማለት አለበት!")
                     else:
-                        new_row = pd.DataFrame([{
-                            "Full Name": staff_name, "ID": emp_id, "Reason": reason, 
-                            "Details": details if details else "ዝርዝር የለም", "Status": "Pending", 
-                            "Remark": "", "Date": start_date.strftime('%Y-%m-%d'), 
-                            "Start_Time": start_time.strftime('%H:%M:%S'), 
-                            "End_Time": end_time.strftime('%H:%M:%S'), 
-                            "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        }])
-                        conn.update(worksheet="Sheet1", data=pd.concat([all_data, new_row], ignore_index=True))
-                        st.balloons(); st.success("✅ ጥያቄው ተመዝግቧል!")
+                        # 1. ዳታውን ከ Sheet1 ማንበብ
+                        all_data = conn.read(worksheet="Sheet1", ttl=0)
+                        
+                        is_duplicate = False
+                        conflict_info = ""
+
+                        if not all_data.empty:
+                            # 2. የዚህን ሰራተኛ መዝገቦች ብቻ መለየት (ID በጽሑፍ መሆኑን ማረጋገጥ)
+                            # በፎቶህ መሰረት ID 117102.0 ሊሆን ስለሚችል ሁለቱንም እናነጻጽራለን
+                            user_records = all_data[all_data['ID'].astype(str).str.contains(str(emp_id).split('.')[0])]
+                            
+                            for _, record in user_records.iterrows():
+                                try:
+                                    # ቀኑን እና ሰዓቱን ከሺቱ ላይ ማንበብ
+                                    r_date = str(record['Date'])
+                                    r_start = str(record['Start_Time'])
+                                    r_end = str(record['End_Time'])
+                                    r_status = str(record['Status'])
+
+                                    # ተሰርዘው (Cancelled) ያለቁ ጥያቄዎችን ችላ እንላለን
+                                    if r_status == "Cancelled":
+                                        continue
+
+                                    # የቆየውን መዝገብ ወደ DateTime መቀየር (ሰከንድ ቢኖርም ባይኖርም)
+                                    prev_start = datetime.strptime(f"{r_date} {r_start}", '%Y-%m-%d %H:%M:%S')
+                                    prev_end = datetime.strptime(f"{r_date} {r_end}", '%Y-%m-%d %H:%M:%S')
+                                    
+                                    # 🔍 ጠንካራ የሰዓት ንጽጽር
+                                    # አዲሱ ጥያቄ ከድሮው መጨረሻ በፊት ከጀመረ እና ከድሮው መጀመሪያ በኋላ ካለቀ Overlap አለ
+                                    if current_start < prev_end and current_end > prev_start:
+                                        is_duplicate = True
+                                        conflict_info = f"{r_date} ({r_start} - {r_end})"
+                                        break
+                                except:
+                                    continue
+
+                        # 3. ምዝገባን መወሰን
+                        if is_duplicate:
+                            st.warning(f"⚠️ ጥያቄው አልተመዘገበም! ሰራተኛው በ {conflict_info} ሰዓት ውስጥ ቀደም ሲል ሌላ ጥያቄ አቅርቧል።")
+                        else:
+                            # አዲስ መዝገብ ማዘጋጀት
+                            new_row = pd.DataFrame([{
+                                "Full Name": staff_name,
+                                "ID": emp_id,
+                                "Reason": reason,
+                                "Details": details if details else "ዝርዝር አልተገለጸም",
+                                "Status": "Pending",
+                                "Remark": "",
+                                "Date": start_date.strftime('%Y-%m-%d'),
+                                "Start_Time": start_time.strftime('%H:%M:%S'),
+                                "End_Time": end_time.strftime('%H:%M:%S'),
+                                "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            }])
+                            
+                            updated_df = pd.concat([all_data, new_row], ignore_index=True)
+                            conn.update(worksheet="Sheet1", data=updated_df)
+                            st.balloons()
+                            st.success("✅ ጥያቄው በትክክል ተመዝግቧል!")
         else:
             st.error("❌ ይህ መለያ ቁጥር ከሰራተኞች ዝርዝር የለም!!")
 
@@ -318,6 +345,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
