@@ -25,7 +25,7 @@ st.markdown("""
 
     /* 2. "ገጽ ይምረጡ" አርዕስት ካርድ */
     div[data-testid="stSidebar"] .stRadio > label {
-        background: linear-gradient(90deg, #007bff, #00d4ff) !important;
+        background: linear-gradient(90deg, #007bff, #7700ff) !important;
         color: white !important;
         padding: 15px !important;
         border-radius: 12px !important;
@@ -318,6 +318,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
