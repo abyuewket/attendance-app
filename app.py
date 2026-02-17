@@ -288,34 +288,62 @@ if page == "🏠 የሰራተኞች መሙያ":
                         st.success("✅ ጥያቄው በተሳካ ሁኔታ ተመዝግቧል!")
         else:
             st.error("❌ ይህ መለያ ቁጥር (ID) በሰራተኞች ዝርዝር ውስጥ የለም!!")
-# --- ገጽ 2: የማናጀር ገጽ ---
 elif page == "🔐 የማናጀር ገጽ":
     st.markdown("<div class='header-box'><h1>🔐 የአስተዳዳሪ መቆጣጠሪያ</h1></div>", unsafe_allow_html=True)
-    admin_password = st.text_input("የአስተዳዳሪ ፓስወርድ", type="password")
     
-    if admin_password == st.secrets.get("admin_password", "1234"):
+    # የፓስወርድ ግብዓት
+    admin_password = st.text_input("የአስተዳዳሪ ፓስወርድ ያስገቡ", type="password", placeholder="••••••••")
+    
+    # ትክክለኛው ፓስወርድ (ከ Secrets ወይም 1234)
+    CORRECT_PASSWORD = st.secrets.get("admin_password", "1234")
+
+    if admin_password == "":
+        # ፓስወርድ ገና ካልተጻፈ የሚታይ
+        st.info("እባክዎ መጀመሪያ የአስተዳዳሪ ፓስወርድ ያስገቡ።")
+        
+    elif admin_password == CORRECT_PASSWORD:
+        # ✅ ፓስወርዱ ትክክል ሲሆን የሚሰራው ክፍል
         try:
             df = conn.read(worksheet="Sheet1", ttl=0)
             if not df.empty and 'Status' in df.columns:
                 pending = df[df['Status'] == 'Pending']
                 st.subheader(f"📬 የሚጠባበቁ ጥያቄዎች ({len(pending)})")
                 
+                if len(pending) == 0:
+                    st.info("ምንም የሚጠባበቅ ጥያቄ የለም።")
+                
                 for idx, row in pending.iterrows():
                     with st.container():
-                        st.markdown(f"""<div class="request-card"><b>👤 ሰራተኛ:</b> {row['Full Name']} (ID: {row['ID']})<br><b>📅 ቀን:</b> {row['Date']} ({row['Start_Time']} - {row['End_Time']})<br><b>❓ ምክንያት:</b> {row['Reason']}</div>""", unsafe_allow_html=True)
+                        st.markdown(f"""
+                            <div class="request-card">
+                                <b>👤 ሰራተኛ:</b> {row['Full Name']} (ID: {row['ID']})<br>
+                                <b>📅 ቀን:</b> {row['Date']} ({row['Start_Time']} - {row['End_Time']})<br>
+                                <b>❓ ምክንያት:</b> {row['Reason']}
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
                         c_rem, c_acc, c_rej = st.columns([2, 1, 1])
-                        rem = c_rem.text_input("ማሳሰቢያ", key=f"rem_{idx}")
+                        rem = c_rem.text_input("ማሳሰቢያ (Remark)", key=f"rem_{idx}")
+                        
                         if c_acc.button("✅ አጽድቅ", key=f"acc_{idx}"):
                             df.at[idx, 'Status'], df.at[idx, 'Remark'] = 'Approved', rem
                             conn.update(worksheet="Sheet1", data=df)
+                            st.success(f"የ {row['Full Name']} ጥያቄ ጸድቋል!")
                             st.rerun()
+                            
                         if c_rej.button("❌ ሰርዝ", key=f"rej_{idx}"):
                             df.at[idx, 'Status'], df.at[idx, 'Remark'] = 'Cancelled', rem
                             conn.update(worksheet="Sheet1", data=df)
+                            st.warning(f"የ {row['Full Name']} ጥያቄ ተሰርዟል!")
                             st.rerun()
-            else: st.info("ምንም ጥያቄ የለም።")
-        except Exception as e: st.error(f"ዳታ ማንበብ አልተቻለም፦ {e}")
-
+            else:
+                st.info("በዳታው ላይ 'Status' የሚል ኮለም አልተገኘም ወይም ፋይሉ ባዶ ነው።")
+        except Exception as e:
+            st.error(f"ዳታ ማንበብ አልተቻለም፦ {e}")
+            
+    else:
+        # ❌ ፓስወርዱ ሲሳሳት የሚታይ መልዕክት
+        st.error("❌ የተሳሳተ ቁልፍ! እባክዎ ትክክለኛውን ሚስጥር ቁጥር ያስገቡ።")
 # --- ገጽ 3: ዳሽቦርድ ---
 elif page == "📊 ዳሽቦርድ":
     st.markdown("<div class='header-box'><h1>📊 የክትትል ዳሽቦርድ</h1></div>", unsafe_allow_html=True)
@@ -337,6 +365,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
