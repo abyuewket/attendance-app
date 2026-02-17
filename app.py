@@ -240,7 +240,7 @@ if page == "🏠 የሰራተኞች መሙያ":
             details = st.text_area("ዝርዝር መግለጫ (አስፈላጊ ከሆነ)")
 
             # --- የምዝገባ ቁልፍ እና የኦቨርላፕ ቼክ ---
-   st.button("🚀 ጥያቄውን መዝግብ"):
+if st.button("🚀 ጥያቄውን መዝግብ"):
     # 1. አዲሱን ሰዓት ወደ Datetime መቀየር
     current_start = datetime.combine(start_date, start_time)
     current_end = datetime.combine(end_date, end_time)
@@ -410,6 +410,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
