@@ -216,7 +216,19 @@ if page == "🏠 የሰራተኞች መሙያ":
             staff_name = staff_row['Full Name'].values[0]
             st.info(f"👤 ሰራተኛ፦ **{staff_name}**")
             
-            col1, col2 = st.columns(2)
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                start_date = st.date_input("መነሻ ቀን", value=date.today())
+
+           with col2:
+               start_time = st.time_input("መነሻ ሰዓት", value=datetime.now().time())
+
+           with col3:
+               end_date = st.date_input("መመለሻ ቀን", value=date.today())
+
+          with col4:
+               end_time = st.time_input("መመለሻ ሰዓት", value=datetime.now().time())
             with col1:
                 start_date = st.date_input("መነሻ ቀን", value=date.today())
                 start_time = st.time_input("መነሻ ሰዓት", value=datetime.now().time())
@@ -342,6 +354,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
