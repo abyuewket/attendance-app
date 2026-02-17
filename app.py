@@ -249,7 +249,7 @@ if st.button("🚀 ጥያቄውን መዝግብ"):
         is_duplicate = False
         if not all_data.empty:
             # የዚህን ሰራተኛ መዝገቦች ብቻ መለየት (ያልተሰረዙትን)
-            user_records = all_data[(all_data['ID'].astype(str).str.contains(clean_id)) & 
+            user_records = all_data[(all_data['ID'].astype(str).str.contains(Employee_id)) & 
                                     (all_data['Status'] != 'Cancelled')]
             
             for _, record in user_records.iterrows():
@@ -334,6 +334,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
