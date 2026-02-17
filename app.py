@@ -239,7 +239,7 @@ if page == "🏠 የሰራተኞች መሙያ":
                     current_start = datetime.combine(start_date, start_time)
                     current_end = datetime.combine(end_date, end_time)
                     
-                   if current_start >= current_end:
+                    if current_start >= current_end:
                         st.error("❌ ስህተት፦ መነሻ ሰዓት ከመድረሻ ሰዓት ቀደም ማለት አለበት!")
                     else:
                         # 1. ዳታውን ከ Sheet1 ማንበብ
@@ -349,6 +349,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
