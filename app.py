@@ -229,12 +229,12 @@ if page == "🏠 የሰራተኞች መሙያ":
 
             with col4:
                 end_time = st.time_input("መመለሻ ሰዓት", value=datetime.now().time())
-            with col1:
-                start_date = st.date_input("መነሻ ቀን", value=date.today())
-                start_time = st.time_input("መነሻ ሰዓት", value=datetime.now().time())
-            with col2:
-                end_date = st.date_input("መመለሻ ቀን", value=date.today())
-                end_time = st.time_input("መመለሻ ሰዓት", value=datetime.now().time())
+           # with col1:
+            #      start_date = st.date_input("መነሻ ቀን", value=date.today())
+               #   start_time = st.time_input("መነሻ ሰዓት", value=datetime.now().time())
+             # with col2:
+                 # end_date = st.date_input("መመለሻ ቀን", value=date.today())
+                #  end_time = st.time_input("መመለሻ ሰዓት", value=datetime.now().time())
 
             reason = st.selectbox("የጥያቄው ምክንያት", ["ህመም", "ዓመታዊ ፈቃድ", "ቤተሰብ ጉዳይ", "ልዩ ፈቃድ", "ሌላ"])
             details = st.text_area("ዝርዝር መግለጫ (አስፈላጊ ከሆነ)")
@@ -354,6 +354,7 @@ elif page == "📊 ዳሽቦርድ":
             st.dataframe(df, use_container_width=True)
         else: st.warning("ዳታው ባዶ ነው።")
     except Exception as e: st.error("ዳሽቦርዱን መጫን አልተቻለም።")
+
 
 
 
